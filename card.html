@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            background-image: url('./card-img/backgroung.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        .card {
+            width: 90px;
+            height: 180px;
+            position: relative;
+            float: left;
+            margin: 10px;
+            /* 設定子元素在 3D 空間內 */
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .card-front {
+            width: 100%;
+            height: 100%;
+            background-image: url('./card-img/1H.jpg');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: absolute;
+            /* 隱藏背面 */
+            backface-visibility: hidden;
+        }
+
+        .card-back {
+            width: 100%;
+            height: 100%;
+            background-image: url('./card-img/200px-礼装金卡背.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: absolute;
+            /* 隱藏背面 */
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+        }
+
+        .card-close {
+            transform: rotateY(180deg);
+        }
+
+        #game {
+            width: 530px;
+            height: 300px;
+            margin: auto;
+        }
+
+        /* .main {
+            
+            width: 100%;
+            height: 100%;
+            background-color: blue;
+            border: 1px solid black;
+            margin: auto;
+        } */
+        #hp0 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 150px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="main">
+        <div id="game"></div>
+        <div id='hp0'>HP:<span id="hp">15</span></div>
+
+    </div>
+
+
+    <script src="./jquery-3.6.4.min.js"></script>
+    <script>
+        const main = document.querySelector('.main')
+        let hp = 15
+
+
+        for (let i = 0; i < 16; i++) {
+            $('#game').append(`
+                <div class="card card-close">
+                    <div class="card-front"></div>
+                    <div class="card-back"></div>
+                </div>
+            `)
+        }
+        for (let i = 0; i < 16; i++) {
+            const num = i % 8 + 1
+            $('.card').eq(i).find('.card-front').css('background-image', `url(./card-img/${num}H.jpg)`)
+            $('.card').eq(i).attr('data-card', num)
+            const target = Math.round(Math.random() * 15)
+            $('.card').eq(target).insertAfter($('.card').eq(i))
+        }
+        $('#game').on('click', '.card', function () {
+            if (
+                // 如果還沒翻開兩張
+                $('.card:not(.card-close)').length < 2 &&
+                // 且這張牌還沒翻開
+                $(this).hasClass('card-close') &&
+                // 且這張牌還沒配對
+                !$(this).hasClass('card-ok')) {
+                $(this).removeClass('card-close')
+            }
+            // 如果翻開兩張了
+            if ($('.card:not(.card-close)').length === 2) {
+                // 檢查數字
+                if ($('.card:not(.card-close)').eq(0).attr('data-card') ===
+                    $('.card:not(.card-close)').eq(1).attr('data-card')
+                ) {
+                    $('.card:not(.card-close)').addClass('card-ok')
+                    $('.card:not(.card-close)').fadeTo(1000, 0)
+                } else if ($('.card:not(.card-close)').eq(0).attr('data-card') !==
+                    $('.card:not(.card-close)').eq(1).attr('data-card')
+                ) { hp-- }
+                $('#hp').text(hp)
+                if (hp === 0) {
+
+                    main.innerHTML = '';
+                    alert('GG');
+                    return
+
+                }
+                // 不管數字是否一樣都翻回來
+                setTimeout(function () {
+                    $('.card:not(.card-close)').addClass('card-close')
+                    if ($('.card-ok').length === $('.card').length) {
+                        alert('恭喜')
+                    }
+                }, 1000)
+            }
+        })
+    </script>
+</body>
+
+</html>
